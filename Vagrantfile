@@ -3,9 +3,11 @@
 
 Vagrant.configure("2") do |config|
   config.vm.box = "asheville-api-virtualbox-precise64"
+  config.vm.box_url = ""
 
   config.vm.provider "vmware_fusion" do |v, override|
     override.vm.box = "asheville-api-vmware-precise64"
+    override.vm.box_url = ""
   end
 
   config.vm.box = "asheville-api-vmware-precise64"

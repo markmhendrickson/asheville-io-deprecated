@@ -1,184 +1,140 @@
-## accounts.asheville
+## asheville.io
 
-This is an [Asheville](https://github.com/asheville) internal
-service for the management of user accounts.
+This is an [Asheville](https://github.com/asheville) external service
+for powering the Asheville Dashboard.
 
-Given proper authentication, it exposes an HTTP/JSON API for:
+It contains both the frontend JavaScript application as well as the
+API for said application.
 
-- Retrieving information about an Asheville user, such as authentication
-tokens for their connected networks and storage systems
-- Adding authentication tokens
-- Deleting a user from Asheville
+The Asheville dashboard is the main interaction point for a user and Asheville,
+and provides them access to settings, sync status and authentication configuration
+(including OAuth flows) for various [storages](https://github.com/asheville/spec/blob/master/storage.md)
+and [sources](https://github.com/asheville/spec/blob/master/sources.md).
 
-## Security
+This API exposes a JSON API intended for the dashboard JavaScript application.
 
-Initially, this API will be exposed on a local network only, requiring
-the use of a VPN to be connected to by other Asheville services.
+It talks to various other Asheville services to populate data and modify
+information, such as the [accounts](https://github.com/asheville/accounts)
+API.
 
-Additionally, an authentication token must be used to connect to the
-service.
+## Hacking on asheville-io
 
-The authentication token is sent in the header in an `X-Asheville-Auth`
-field, i.e:
-
-```
-GET: "accounts.asheville/v1/user/6f447ed6-15b5-4e3b-b301-ddc0d07f409b.json HTTP/1.1"
-HOST: "accounts.asheville"
-X-Asheville-Auth: "foobar-token"
-```
-
-## Hacking on asheville-accounts
-
-TODO Vagrant Guide.
+Download and install [Vagrant](http://vagrantup.com)
+and [VirtualBox](https://www.virtualbox.org/)
 
 ## API
 
 ### Table of Contents
 
-- [User](#user) contains methods for manipulating individual Asheville users
-- [Admin](#admin) exposes various admin statistics about the Asheville userbase
+- [Storages](#storages) contains methods for accessing and configuring
+a "storage" for a user.
+- [Sources](#storages) contains methods for accessing and configuring
+a "source" for a user.
+- [Session](#session) contains authentication endpoints for the application,
+as well as details for a specific user.
+- [Storage Surveys](#storage-surveys) contains authentication endpoints for the application
 
 This is documentation for an early API. It is very much a work-in-progress
 and may change or break at any time.
 
-### User
+### Storages
 
-A user represents an invidiual that has signed up and connected at least
-one storage account with Asheville.
+A storage is a connected service that is used to store
+data collected from sources.
 
-#### Retrieve a User
+#### Retrieve all storages
 
-**URL**: `/v1/user/<uuid>.json`
+**URL**: `/v1/storages`
 
 **METHOD**: `GET`
 
-**ARGS**:
-
-- `user_id` (required): A unique identifier representing the users
-Asheville ID. This should be a 36 character UUID as specified in [RFC 4122](http://tools.ietf.org/html/rfc4122.html),
-or, more realistically, generated using Python's built-in `uuid.uuid4()`
-
 ##### Example
 
-`GET /v1/user/6f447ed6-15b5-4e3b-b301-ddc0d07f409b.json`
+`GET /v1/storages`
 
 ```json
 {
-    "id": "6f447ed6-15b5-4e3b-b301-ddc0d07f409b",
-    "identity": {
-        "name": "Jack Pearkes",
-        "email": "jackpearkes@gmail.com"
-    },
     "storages": [{
+        "id": "6f447ed6-15b5-4e3b-b301-ddc0d07f409b",
         "type": "dropbox",
-        "authentication_type": "credential_pair",
-        "access_key": "foo",
-        "access_secret": "bar",
-        "state": "paused",
-        "settings": {
-            "arbitrary": "key value settings"
-        }
-    }],
-    "sources": [{
-        "type": "facebook",
-        "authentication_type": "credential_pair",
-        "access_key": "foo",
-        "access_secret": "bar",
-        "state": "bad_authentication",
-        "settings": {
-            "arbitrary": "key value settings"
+        "name": "Dropbox",
+        "connected": true,
+        "sizes": {
+            total: 5000000000, // 5 GB
+            available: 2000000000, // 2 GB
+            occupied: 1250000000, // 1.25 GB
+            other: 1750000000 // 1.75 GB
         },
-        "content_types": {
-            "photos": true,
-            "checkins": false,
-            "facebook_specific_thing": true
-        }
-    }],
-    "created_at": "2013-10-05 10:33:22",
-    "updated_at": "2013-10-05 10:33:22"
+        "last_completed_sync": null
+    }]
 }
 ```
 
-#### Create a User
+### Sources
 
-Creates a user with the given credentials.
+A source is a connected service that is used to pull in information,
+such as Facebook or Twitter.
 
-**URL**: `/v1/user`
+#### Retrieve all sources
 
-**METHOD**: `POST`
-
-**REQUEST BODY** (json):
-
-- `identity` (optional): Identity meta data for the user
-    - `name`: The users full name
-    - `email`: The users email address
-- `storages` (optional): An array of storage objects
-    - `type` (required): The type of storage backend, i.e `dropbox`
-    - `authentication_type` (required): The method of authentication, i.e `credential_pair`
-    - `access_key` (required for `credential_pair` type): The key or ID on the service for the user
-    - `access_secret` (required for `credential_pair` type): The secret or password associated with the key for the user on the service
-    - `state` (optional): The current state of the storage backend, i.e `active` or `bad_authentication`
-    - `settings` (optional): Any arbitrary service-specific settings. Any valid JSON can be passed into this key.
-- `sources` (optional): An array of source objects
-    - `type` (required): The type of storage backend, i.e `facebook`
-    - `authentication_type` (required): The method of authentication, i.e `credential_pair`
-    - `access_key` (required for `credential_pair` type): The key or ID on the service for the user
-    - `access_secret` (required for `credential_pair` type): The secret or password associated with the key for the user on the service
-    - `state` (optional): The current state of the storage backend, i.e `active` or `bad_authentication`
-    - `settings` (optional): Any arbitrary service-specific settings. Any valid JSON can be passed into this key.
-    - `content_types` (optional): A hash of boolean key-value pairs representing what the Asheville service should sync for the user
-
-##### Example
-
-`POST /v1/user`
-
-Payload:
-
-```json
-{
-    "identity": {
-        "email": "jackpearkes@gmail.com"
-    }
-}
-```
-
-Returns:
-
-```json
-{
-    "id": "6f447ed6-15b5-4e3b-b301-ddc0d07f409b",
-    "identity": {
-        "email": "jackpearkes@gmail.com",
-        "name": null
-    },
-    "storages": [],
-    "sources": [],
-    "created_at": "2013-10-05 10:33:22",
-    "updated_at" "2013-10-05 10:33:22"
-}
-```
-
-### Admin
-
-Admin exposes various statistics about the Asheville user accounts.
-
-#### Retrieve Stats
-
-Returns some userbase stats about Asheville.
-
-**URL**: `/v1/admin/stats`
+**URL**: `/v1/sources`
 
 **METHOD**: `GET`
 
 ##### Example
 
-`GET /v1/admin/stats`
+`GET /v1/sources`
+
+```json
+{
+    "sources": [{
+        "id": "6f447ed6-15b5-4e3b-b301-ddc0d07f409b",
+        "type": "facebook",
+        "name": "Facebook",
+        "connected": true,
+        "sizes": {
+            total: 5000000000, // 5 GB
+            available: 2000000000, // 2 GB
+            occupied: 1250000000, // 1.25 GB
+            other: 1750000000 // 1.75 GB
+        },
+        "total_items_synced": null,
+        "total_items_available": null,
+        "last_completed_sync": null,
+        "content_types": {
+            {
+                id: "6f447ed6-15b5-4e3b-b301-ddc0d07f409b",
+                name: "Photos",
+                enabled: true
+            }
+        },
+    }
+    }]
+}
+```
+
+### Session
+
+Exposes authentication and user information.
+
+#### Retrieve Session
+
+Returns a users current session
+
+**URL**: `/v1/session`
+
+**METHOD**: `GET`
+
+##### Example
+
+`GET /v1/session`
 
 Returns:
 
 ```json
 {
-    "total_users": 41,
-    "last_signup_at": "2013-10-05 10:33:22"
+    "email": "example@example.org",
+    "name": "Saul Goodman",
+    "id": "6f447ed6-15b5-4e3b-b301-ddc0d07f409b"
 }
 ```
