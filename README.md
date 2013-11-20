@@ -93,10 +93,10 @@ such as Facebook or Twitter.
         "name": "Facebook",
         "connected": true,
         "sizes": {
-            total: 5000000000, // 5 GB
-            available: 2000000000, // 2 GB
-            occupied: 1250000000, // 1.25 GB
-            other: 1750000000 // 1.75 GB
+            "total": 5000000000,
+            "available": 2000000000, // 2 GB
+            "occupied": 1250000000, // 1.25 GB
+            "other": 1750000000 // 1.75 GB
         },
         "total_items_synced": null,
         "total_items_available": null,
@@ -136,5 +136,27 @@ Returns:
     "email": "example@example.org",
     "name": "Saul Goodman",
     "id": "6f447ed6-15b5-4e3b-b301-ddc0d07f409b"
+}
+```
+
+### Storage Survey
+
+Recieves a survey result for what storages people want.
+
+#### Recieve Survey
+
+**URL**: `/v1/storage_survey`
+
+**METHOD**: `POST`
+
+##### Example
+
+`POST /v1/storage_survey`
+
+Returns:
+
+```json
+{
+    "success": true,
 }
 ```
