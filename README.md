@@ -60,10 +60,10 @@ data collected from sources.
         "name": "Dropbox",
         "connected": true,
         "sizes": {
-            total: 5000000000, // 5 GB
-            available: 2000000000, // 2 GB
-            occupied: 1250000000, // 1.25 GB
-            other: 1750000000 // 1.75 GB
+            "total": 5000000000,
+            "available": 2000000000,
+            "occupied": 1250000000,
+            "other": 1750000000
         },
         "last_completed_sync": null
     }]
@@ -94,18 +94,18 @@ such as Facebook or Twitter.
         "connected": true,
         "sizes": {
             "total": 5000000000,
-            "available": 2000000000, // 2 GB
-            "occupied": 1250000000, // 1.25 GB
-            "other": 1750000000 // 1.75 GB
+            "available": 2000000000,
+            "occupied": 1250000000,
+            "other": 1750000000
         },
         "total_items_synced": null,
         "total_items_available": null,
         "last_completed_sync": null,
         "content_types": {
             {
-                id: "6f447ed6-15b5-4e3b-b301-ddc0d07f409b",
-                name: "Photos",
-                enabled: true
+                "id": "6f447ed6-15b5-4e3b-b301-ddc0d07f409b",
+                "name": "Photos",
+                "enabled": true
             }
         },
     }
