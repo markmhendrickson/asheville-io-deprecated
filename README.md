@@ -22,6 +22,29 @@ API.
 Download and install [Vagrant](http://vagrantup.com)
 and [VirtualBox](https://www.virtualbox.org/)
 
+    $ vagrant up
+    ...
+    $ vagrant ssh
+    ...
+    $ cd /vagrant
+    $ make deps
+    ...
+
+Running the webserver:
+
+    $ make run
+    ...
+
+Running tests:
+
+    $ make test
+    ...
+
+Creating the initial database:
+
+    $ make bootstrap
+    ...
+
 ## API
 
 ### Table of Contents

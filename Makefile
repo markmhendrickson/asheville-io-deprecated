@@ -4,6 +4,9 @@ deps:
 run:
 	@DEBUG=True python app.py
 
+bootstrap:
+	@python bootstrap.py
+
 test:
 	@ENVIRONMENT=test PYTHONPATH=. py.test -v test/
 
